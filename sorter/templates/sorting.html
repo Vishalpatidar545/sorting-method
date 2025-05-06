@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sorting Algorithms - Django</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+       
+        :root {
+          --primary-color: #3498db;
+          --secondary-color: #2c3e50;
+          --success-color: #2ecc71;
+          --danger-color: #e74c3c;
+          --light-color: #ecf0f1;
+          --dark-color: #34495e;
+          --border-radius: 4px;
+          --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #1f1c2c, #928dab);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            padding: 30px;
+            background: linear-gradient(to top left, rgba(127, 118, 117, 0.3), rgba(139, 125, 125, 0.5));
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(10, 10, 14, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: black;
+        }
+
+        h2, h3 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        
+        h1 {
+          color: #fcd34d;
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        
+        .sorting-form {
+          margin-bottom: 30px;
+          
+        }
+        
+        .form-group {
+          margin-bottom: 20px;
+        }
+        
+        label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: bold;
+          color:#0b0b09;
+          font-size: larger;
+        }
+        
+        .input-field {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: var(--border-radius);
+          font-size: 16px;
+          box-sizing: border-box;
+        }
+        
+        .input-field:focus {
+          border-color: var(--primary-color);
+          outline: none;
+          box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        .algorithm-selection {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        
+        .algorithm-btn {
+          background-color: #fff;
+          border: 1px solid #ddd;
+          padding: 10px 15px;
+          border-radius: var(--border-radius);
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+        
+        .algorithm-btn:hover {
+          background-color: #f0f0f0;
+        }
+        
+        .algorithm-btn.selected {
+          background-color: var(--primary-color);
+          color: white;
+          border-color: var(--primary-color);
+        }
+        
+        .submit-btn {
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          padding: 14px 20px;
+          border-radius: var(--border-radius);
+          cursor: pointer;
+          font-size: 16px;
+          width: 100%;
+          transition: background-color 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+          background-color: #2980b9;
+        }
+        
+        .result-section {
+          margin-top: 30px;
+        }
+        
+        .result-title {
+          color: var(--dark-color);
+          margin-bottom: 15px;
+          font-size: 18px;
+        }
+        
+        .numbers-display {
+          background-color: var(--light-color);
+          padding: 15px;
+          border-radius: var(--border-radius);
+          overflow-wrap: break-word;
+          font-family: monospace;
+          font-size: 16px;
+        }
+        
+        .error-message {
+          color: var(--danger-color);
+          padding: 10px;
+          background-color: rgba(231, 76, 60, 0.1);
+          border-radius: var(--border-radius);
+        }
+        
+        .algorithm-info {
+          margin-top: 30px;
+          padding: 15px;
+          background-color: #f8f9fa;
+          border-left: 4px solid var(--primary-color);
+        }
+        
+        .algorithm-info h3 {
+          margin-top: 0;
+          color: var(--secondary-color);
+        }
+        
+        @media (max-width: 600px) {
+          .container {
+            padding: 15px;
+          }
+          
+          .algorithm-selection {
+            flex-direction: column;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sorting Algorithm Visualizer</h1>
+        
+        <div class="sorting-form">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="numbers">Enter numbers (comma-separated):</label>
+                    <input type="text" id="numbers" name="numbers" class="input-field" 
+                           placeholder="e.g. 4,2,7,1,9,3" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Sorting Algorithm:</label>
+                    <div class="algorithm-selection">
+                        <label class="algorithm-btn {% if selected_algorithm == 'insertion' %}selected{% endif %}">
+                            <input type="radio" name="algorithm" value="insertion" {% if selected_algorithm == 'insertion' %}checked{% endif %} required>
+                            Insertion Sort
+                        </label>
+                        <label class="algorithm-btn {% if selected_algorithm == 'selection' %}selected{% endif %}">
+                            <input type="radio" name="algorithm" value="selection" {% if selected_algorithm == 'selection' %}checked{% endif %}>
+                            Selection Sort
+                        </label>
+                        <label class="algorithm-btn {% if selected_algorithm == 'bubble' %}selected{% endif %}">
+                            <input type="radio" name="algorithm" value="bubble" {% if selected_algorithm == 'bubble' %}checked{% endif %}>
+                            Bubble Sort
+                        </label>
+                        <label class="algorithm-btn {% if selected_algorithm == 'quick' %}selected{% endif %}">
+                            <input type="radio" name="algorithm" value="quick" {% if selected_algorithm == 'quick' %}checked{% endif %}>
+                            Quick Sort
+                        </label>
+                        <label class="algorithm-btn {% if selected_algorithm == 'merge' %}selected{% endif %}">
+                            <input type="radio" name="algorithm" value="merge" {% if selected_algorithm == 'merge' %}checked{% endif %}>
+                            Merge Sort
+                        </label>
+                        <label class="algorithm-btn {% if selected_algorithm == 'heap' %}selected{% endif %}">
+                            <input type="radio" name="algorithm" value="heap" {% if selected_algorithm == 'heap' %}checked{% endif %}>
+                            Heap Sort
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Sort Numbers</button>
+            </form>
+        </div>
+
+        {% if sorted_list %}
+        <div class="result-section">
+            <h2 class="result-title">Sorted Result ({{ selected_algorithm|title }} Sort):</h2>
+            {% if sorted_list.0 == 'Invalid input! Use comma-separated numbers.' %}
+                <div class="error-message">{{ sorted_list.0 }}</div>
+            {% else %}
+                <div class="numbers-display">{{ sorted_list }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="algorithm-info">
+            <h3>Algorithm Information</h3>
+            {% if selected_algorithm == 'insertion' %}
+                <p>Insertion sort is a simple sorting algorithm that builds the final sorted array one item at a time. Time complexity: O(n²).</p>
+            {% elif selected_algorithm == 'selection' %}
+                <p>Selection sort is an in-place comparison sorting algorithm. Time complexity: O(n²).</p>
+            {% elif selected_algorithm == 'bubble' %}
+                <p>Bubble sort repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order. Time complexity: O(n²).</p>
+            {% elif selected_algorithm == 'quick' %}
+                <p>Quick sort is an efficient, divide-and-conquer sorting algorithm. Average time complexity: O(n log n).</p>
+            {% elif selected_algorithm == 'merge' %}
+                <p>Merge sort is an efficient, stable, divide-and-conquer sorting algorithm. Time complexity: O(n log n).</p>
+            {% elif selected_algorithm == 'heap' %}
+                <p>Heap sort is a comparison-based sorting algorithm that uses a binary heap data structure. Time complexity: O(n log n).</p>
+            {% else %}
+                <p>Select an algorithm above to see information about it.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        
+        document.querySelectorAll('.algorithm-btn input').forEach(input => {
+            input.addEventListener('change', function() {
+             
+                document.querySelectorAll('.algorithm-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+       
+                if (this.checked) {
+                    this.parentElement.classList.add('selected');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
